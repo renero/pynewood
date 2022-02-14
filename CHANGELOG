@@ -1,0 +1,15 @@
+0.2.4
+-----
+    - graph_utils() added.
+
+0.2.3
+-----
+    - "config()"" now returns the parameters and the logger in two separated
+    values, instead of returning logger inside the parameters.
+    - The default parameters filename is ".pyground.yaml" and it is first
+    searched in the current working directory. If not found, then it is searched
+    in the home folder.
+
+0.2.2
+-----
+    - Changed the method that computes the toy dataset.
