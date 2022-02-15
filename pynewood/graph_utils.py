@@ -431,7 +431,7 @@ def graph_from_dictionary(d: Dict[str, Union[str, List[str]]]) -> AnyGraph:
 
 def graph_union(graphs: List[AnyGraph], nodes: List[Union[str, int]]):
     """
-    Computes the intersection of several graphs as the graph with the edges
+    Computes the union of several graphs as the graph with the edges
     in common among all them. The resulting edges' weights are the nr of times
     that they are present in the set.
 
@@ -457,6 +457,40 @@ def graph_union(graphs: List[AnyGraph], nodes: List[Union[str, int]]):
             G.add_edge(u, v, weight=1)
 
     return G
+
+
+def graph_intersection(graphs: List[AnyGraph], nodes: List[Union[str, int]]):
+    """
+    Computes the intersection of several graphs as the graph with the edges
+    in common among all them. The resulting edges' weights are the nr of times
+    that they are present in the set.
+
+    Args:
+        graphs: (List[nx.Graph] or List[nx.DiGraph]) A list of graphs
+        nodes: Default list of nodes for the resulting graph, to ensure that
+            graph is populated with at least these nodes, even though not all
+            edges link them entirely
+
+    Returns:
+        nx.Digraph with the edges in common, weighted by the nr of times they appear
+    """
+    assert (
+        len(graphs) > 1
+    ), "This method needs more than one graph to compute intersection"
+    G = nx.DiGraph()
+    if nodes is not None:
+        G.add_nodes_from(nodes)
+    for g in graphs:
+        for u, v, d in g.edges(data=True):
+            if G.has_edge(u, v):
+                G[u][v]["weight"] += 1
+                continue
+            G.add_edge(u, v, weight=1)
+    H = nx.DiGraph()
+    for u, v, d in G.edges(data=True):
+        if d['weight'] == len(graphs):
+            H.add_edge(u, v)
+    return H
 
 
 def graph_biconnections(g) -> Set[Tuple[str, str]]:

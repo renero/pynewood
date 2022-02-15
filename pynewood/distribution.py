@@ -179,6 +179,8 @@ def get_boundaries(values, percentile=None, threshold=None, **kwargs):
     """
     Search for the threshold for a given percentile, the percentile for a given
     threshold, and plots the results if the corresponding flag is set to True.
+
+
     Args:
         values (np.array): the 1D values
         percentile (float or int): represents the percentage of the value, from
