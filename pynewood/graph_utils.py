@@ -303,7 +303,7 @@ def graph_to_dot_file(g: AnyGraph, location: Union[Path, str]) -> None:
     nx.drawing.nx_pydot.write_dot(g, location)
 
 
-def graph_fom_csv(
+def graph_from_csv(
         graph_file: Union[Path, str],
         graph_type: Callable,
         source_label="from",
