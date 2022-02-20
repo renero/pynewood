@@ -1,3 +1,4 @@
+import os
 import string
 import random
 
@@ -105,6 +106,8 @@ def dot_graphs(
     for d, dag in enumerate(dags):
         d_obj = dot_graph(dag, undirected=undirected, odots=odots, plot=False, **kwargs)
         output = f"./png/dag_{label}_{d}.png"
+        if not os.path.exists("./png"):
+            os.makedirs("./png")
         d_obj.write_png(output)
         pngs.append(output)
 
