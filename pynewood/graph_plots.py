@@ -113,7 +113,6 @@ def dot_graphs(
 
     # Represent all the DAGs together
     fig = plt.figure(figsize=fig_size)
-    # f, ax = plt.subplots(num_rows, num_cols, figsize=fig_size)
     images = [plt.imread(png) for png in pngs]
     if dag_names is None:
         dag_names = [f"dag_{i}" for i in range(len(dags))]
@@ -121,8 +120,6 @@ def dot_graphs(
     if len(dags) > num_cols and num_rows == 1:
         num_cols = len(dags)
     for i in range(num_rows * num_cols):
-        # row = int(i / num_cols)
-        # col = np.round(((i / num_cols) - row) * num_cols).astype(int)
         ax = fig.add_subplot(num_rows, num_cols, i + 1)
         if i >= len(pngs):  # empty image https://stackoverflow.com/a/30073252
             npArray = np.array([[[255, 255, 255, 255]]], dtype="uint8")
@@ -143,6 +140,129 @@ def plot_dot(dot_object: pydot.Dot, **kwargs) -> None:
     """ Displays a DOT object in the notebook """
     image = Image(dot_object.create_png(), **kwargs)
     display(image)
+
+
+def dot_compared(g: AnyGraph, ref: AnyGraph, odots: bool = False) -> Dot:
+    """
+    Build a DOT object for the graph (g) taking into account a reference graph
+
+    Arguments:
+        g (Graph or DiGraph): this is the graph to be compared against the ground truth
+        ref (Graph or DiGraph): this is the reference graph or ground truth
+        odots (bool): whether represent bidirectional edges with circles
+
+    Returns:
+        Dot object
+
+    """
+    dot_string = """
+    strict digraph  {
+        concentrate=True;
+    """
+    dir_options = "arrowhead=odot, arrowtail=odot, dir=both" if odots else "dir=none"
+    edge_weights = list(map(lambda t: t[2]['weight'], g.edges(data=True)))
+    min_weight, max_weight = min(edge_weights), max(edge_weights)
+    list(map(lambda t: t[2]['weight'], g.edges(data=True)))
+    for u, v, data in g.edges(data=True):
+        dot_string += f"{u:3s} -> {v:3s} "
+        penwidth = int(data["weight"] - min_weight + 1)
+        if ref.has_edge(u, v) and not g.has_edge(v, u):
+            dot_string += f'[penwidth={penwidth}, color="darkgreen"];\n'
+        elif g.has_edge(v, u):
+            dot_string += f'[penwidth={penwidth}, color="darkgreen", '
+            dot_string += f'style="dashed", {dir_options}];\n'
+        elif ref.has_edge(v, u):
+            dot_string += f'[penwidth={penwidth}, color="darkgrey", '
+            dot_string += f'style="dashed"];\n'
+        else:
+            dot_string += f'[penwidth={penwidth}, color="red"];\n'
+    dot_string += "}"
+    return pydot.graph_from_dot_data(dot_string)[0]
+
+
+def dot_reference(ref: AnyGraph, g: AnyGraph) -> Dot:
+    """
+    Build a DOT object for the reference graph, highlighting matches obtained in the
+    other graph.
+
+    Arguments:
+        g (Graph or DiGraph): this is the graph obtained against the ground truth
+        ref (Graph or DiGraph): this is the reference graph or ground truth to be
+        formatted
+
+    Returns:
+        Dot object
+
+    """
+    dot_string = """
+    strict digraph  {
+        concentrate=True;
+    """
+    list(map(lambda t: t[2]['weight'], g.edges(data=True)))
+    for u, v, data in ref.edges(data=True):
+        dot_string += f"{u:3s} -> {v:3s} "
+        if g.has_edge(u, v) and not g.has_edge(v, u):
+            dot_string += f'[color="darkgreen"];\n'
+        elif g.has_edge(v, u):
+            dot_string += f'[color="darkgrey"];\n'
+        else:
+            dot_string += ';\n'
+    dot_string += "}"
+    return pydot.graph_from_dot_data(dot_string)[0]
+
+
+def dot_comparison(
+        dag: AnyGraph,
+        reference: AnyGraph,
+        dag_names: List[str] = None,
+        odots: bool = True,
+        **kwargs,
+):
+    """
+    Make a plot with several Dots of the dags passed.
+    Args:
+        dag: The graph to be compared.
+        reference: The graph used as reference
+        dag_names: A list of names for the graphs passed
+        odots: Whether representing bidirectional edges with circles
+        **kwargs: optional arguments to be passed to matplotlib
+
+    Returns:
+        None
+    """
+    figsize = kwargs.get("figsize", (12, 8))
+    pngs = []
+    if not os.path.exists("./png"):
+        os.makedirs("./png")
+
+    # Build the DOT for the compared graph
+    d_obj = dot_compared(dag, reference, odots)
+    output = f"./png/dag_comp.png"
+    d_obj.write_png(output)
+    pngs.append(output)
+
+    # Build the DOT for the reference graph (ground truth)
+    d_obj = dot_reference(reference, dag)
+    output = f"./png/dag_ref.png"
+    d_obj.write_png(output)
+    pngs.append(output)
+
+    # Represent all the DAGs together
+    fig = plt.figure(figsize=figsize)
+    images = [plt.imread(png) for png in pngs]
+    if dag_names is None:
+        dag_names = ["DAG", "REFERENCE"]
+
+    for i in range(2):
+        ax = fig.add_subplot(1, 2, i + 1)
+        ax.imshow(images[i])
+        ax.set_title(f"{dag_names[i].upper()}")
+        ax.set_axis_off()
+
+    title = "Causal DAGs"
+    fig.suptitle(title, fontsize=16)
+    plt.tight_layout()
+    plt.show()
 
 
 def plot_graph(graph: nx.DiGraph) -> None:
