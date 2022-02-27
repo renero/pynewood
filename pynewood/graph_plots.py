@@ -233,6 +233,7 @@ def dot_comparison(
         None
     """
     figsize = kwargs.get("figsize", (12, 8))
+    title = kwargs.get("title", "Causal DAGs comparison")
     pngs = []
     if not os.path.exists("./png"):
         os.makedirs("./png")
@@ -261,7 +262,6 @@ def dot_comparison(
         ax.set_title(f"{dag_names[i].upper()}")
         ax.set_axis_off()
 
-    title = "Causal DAGs"
     fig.suptitle(title, fontsize=16)
     plt.tight_layout()
     plt.show()
