@@ -173,11 +173,8 @@ def dot_compared(g: AnyGraph, ref: AnyGraph, odots: bool = False) -> Dot:
             dot_string += f'style="dashed", {dir_options}];\n'
         elif ref.has_edge(v, u):
             dot_string += f'[penwidth={penwidth}, color="red"];\n'
-            # dot_string += f'[penwidth={penwidth}, color="darkgrey", '
-            # dot_string += f'style="dashed"];\n'
         else:
             dot_string += f'[style="dashed", color="darkgrey"];\n'
-            # dot_string += f'[penwidth={penwidth}, color="red"];\n'
     dot_string += "}"
     return pydot.graph_from_dot_data(dot_string)[0]
 
