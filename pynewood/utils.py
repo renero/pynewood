@@ -1,14 +1,16 @@
 # os.environ['PYTHONHASHSEED'] = '0'
 
-import random as rand
-from collections import defaultdict
-from random import randint, random
-from typing import List
-
 import boto3 as boto3
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import random as rand
 import sagemaker as sagemaker
+
+from collections import defaultdict
+from random import randint, random
+from typing import List, Dict, Any, Callable
+
 from prettytable import PrettyTable
 from sagemaker import get_execution_role
 from scipy.special import expit  # this is the sigmoid function
@@ -402,3 +404,61 @@ def split_data(data: np.ndarray, train_percentage: float = 0.8):
     training, test = data[training_idx, :], data[test_idx, :]
 
     return training, test
+
+
+def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
+                   title="Multiplot", **kwargs):
+    """
+    Plots multiple plots in a multiline fashion. For each plot the method `func` is
+    called to produce each individual plot. The dictionary `values` contains pairs
+    where the key is the title of each plot, and value contains the numeric values to
+    be plotted.
+
+    Args:
+        values: A dictionary where the key is the name of each plot, and the value
+            is whatever your plot `func` will represent on each individual plot.
+        num_cols: The number of columns in the grid
+        func: A function that will accept an `ax`, `values`, `target_name` and
+            `labels` for the X axis, and will plot that information.
+        title: The sup_title of the plot.
+
+    Returns:
+        None
+
+    Examples:
+        >>> def single_plot(ax, values, target_name, labels):
+        >>>     ax.plot(values, marker='.')
+        >>>     ax.set_xticks(range(len(labels)))
+        >>>     ax.set_xticklabels(labels)
+        >>>     ax.set_title(target_name)
+        >>>
+        >>> my_dict = {k:my_value[k] for k in features}
+        >>> multiplot(my_dict, 5, single_plot, title="SHAP values",\
+                figsize=(12, 5), sharey=True)
+
+    """
+    feature_names = list(values.keys())
+    num_plots = len(feature_names)
+    num_rows = int(num_plots / num_cols)
+    fig, ax = plt.subplots(num_rows, num_cols, **kwargs)
+    row, col = 0, 0
+
+    def blank(ax):
+        npArray = np.array([[[255, 255, 255, 255]]], dtype="uint8")
+        ax.imshow(npArray, interpolation="nearest")
+        ax.set_axis_off()
+
+    for i in range(num_rows * num_cols):
+        if (i % num_cols == 0) and (i != 0):
+            row += 1
+            col = 0
+        if i < num_plots:  # empty image https://stackoverflow.com/a/30073252
+            target_name = feature_names[i]
+            labels = sorted(list(set(feature_names) - set([target_name])))
+            func(ax[row, col], values[target_name], target_name, labels)
+        else:
+            blank(ax[row, col])
+        col += 1
+    plt.suptitle(title)
+    plt.tight_layout()
+    plt.show()

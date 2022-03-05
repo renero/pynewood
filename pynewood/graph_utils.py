@@ -421,7 +421,7 @@ def graph_from_parent_ids(
     return g
 
 
-def graph_from_dictionary(d: Dict[str, Union[str, List[str]]]) -> AnyGraph:
+def graph_from_dictionary(d: Dict[str, List[Union[str, Tuple[str, float]]]]) -> AnyGraph:
     """
     Builds a graph from a dictionary like {'u': ['v', 'w'], 'x': ['y']}.
     The elements of the list can be tuples including weight
