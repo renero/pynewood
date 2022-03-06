@@ -439,7 +439,7 @@ def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
     """
     feature_names = list(values.keys())
     num_plots = len(feature_names)
-    num_rows = int(num_plots / num_cols)
+    num_rows = int(num_plots / num_cols) + 1
     fig, ax = plt.subplots(num_rows, num_cols, **kwargs)
     row, col = 0, 0
 
