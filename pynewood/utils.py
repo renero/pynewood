@@ -454,7 +454,7 @@ def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
             col = 0
         if i < num_plots:  # empty image https://stackoverflow.com/a/30073252
             target_name = feature_names[i]
-            labels = sorted(list(set(feature_names) - set([target_name])))
+            labels = list(set(feature_names) - set([target_name]))
             func(ax[row, col], values[target_name], target_name, labels)
         else:
             blank(ax[row, col])
