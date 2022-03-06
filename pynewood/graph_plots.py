@@ -168,13 +168,13 @@ def dot_compared(g: AnyGraph, ref: AnyGraph, odots: bool = False) -> Dot:
         penwidth = int(data["weight"] - min_weight + 1)
         if ref.has_edge(u, v) and not g.has_edge(v, u):
             dot_string += f'[penwidth={penwidth}, color="darkgreen"];\n'
-        elif g.has_edge(v, u):
+        elif g.has_edge(v, u) and (ref.has_edge(u,v) or ref.has_edge(v, u)):
             dot_string += f'[penwidth={penwidth}, color="darkgreen", '
             dot_string += f'style="dashed", {dir_options}];\n'
         elif ref.has_edge(v, u):
             dot_string += f'[penwidth={penwidth}, color="red"];\n'
         else:
-            dot_string += f'[style="dashed", color="darkgrey"];\n'
+            dot_string += f'[style="dashed", color="darkgrey", dir="forward"];\n'
     dot_string += "}"
     return pydot.graph_from_dot_data(dot_string)[0]
 
