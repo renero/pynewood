@@ -160,12 +160,16 @@ def dot_compared(g: AnyGraph, ref: AnyGraph, odots: bool = False) -> Dot:
         concentrate=True;
     """
     dir_options = "arrowhead=odot, arrowtail=odot, dir=both" if odots else "dir=none"
-    edge_weights = list(map(lambda t: t[2]['weight'], g.edges(data=True)))
-    min_weight, max_weight = min(edge_weights), max(edge_weights)
-    list(map(lambda t: t[2]['weight'], g.edges(data=True)))
+    if nx.is_weighted(g):
+        edge_weights = list(map(lambda t: t[2]['weight'], g.edges(data=True)))
+        min_weight, max_weight = min(edge_weights), max(edge_weights)
+    # list(map(lambda t: t[2]['weight'], g.edges(data=True)))
     for u, v, data in g.edges(data=True):
         dot_string += f"{u:3s} -> {v:3s} "
-        penwidth = int(data["weight"] - min_weight + 1)
+        if nx.is_weighted(g):
+            penwidth = int(data["weight"] - min_weight + 1)
+        else:
+            penwidth = 1
         if ref.has_edge(u, v) and not g.has_edge(v, u):
             dot_string += f'[penwidth={penwidth}, color="darkgreen"];\n'
         elif g.has_edge(v, u) and (ref.has_edge(u,v) or ref.has_edge(v, u)):
