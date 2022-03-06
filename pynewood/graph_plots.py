@@ -203,7 +203,7 @@ def dot_reference(ref: AnyGraph, g: AnyGraph) -> Dot:
         if g.has_edge(u, v) and not g.has_edge(v, u):
             dot_string += f'[color="darkgreen"];\n'
         elif g.has_edge(v, u):
-            dot_string += f'[color="darkgrey"];\n'
+            dot_string += f'[style="dashed", color="green"];\n'
         else:
             dot_string += ';\n'
     dot_string += "}"
