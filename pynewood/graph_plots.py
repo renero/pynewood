@@ -201,7 +201,6 @@ def dot_reference(ref: AnyGraph, g: AnyGraph) -> Dot:
     strict digraph  {
         concentrate=True;
     """
-    list(map(lambda t: t[2]['weight'], g.edges(data=True)))
     for u, v, data in ref.edges(data=True):
         dot_string += f"{u:3s} -> {v:3s} "
         if g.has_edge(u, v) and not g.has_edge(v, u):
