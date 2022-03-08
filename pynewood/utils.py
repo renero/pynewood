@@ -407,7 +407,7 @@ def split_data(data: np.ndarray, train_percentage: float = 0.8):
 
 
 def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
-                   title="Multiplot", extra_args:Dict=None, **kwargs):
+                   title="Multiplot", extra_args:Dict={}, **kwargs):
     """
     Plots multiple plots in a multiline fashion. For each plot the method `func` is
     called to produce each individual plot. The dictionary `values` contains pairs
