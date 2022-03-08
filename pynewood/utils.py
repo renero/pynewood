@@ -407,7 +407,7 @@ def split_data(data: np.ndarray, train_percentage: float = 0.8):
 
 
 def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
-                   title="Multiplot", **kwargs):
+                   title="Multiplot", extra_args:Dict=None, **kwargs):
     """
     Plots multiple plots in a multiline fashion. For each plot the method `func` is
     called to produce each individual plot. The dictionary `values` contains pairs
@@ -421,6 +421,8 @@ def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
         func: A function that will accept an `ax`, `values`, `target_name` and
             `labels` for the X axis, and will plot that information.
         title: The sup_title of the plot.
+        extra_args: A dictionary with extra arguments to be passed to the
+            function that draws each individual plot
 
     Returns:
         None
@@ -455,7 +457,7 @@ def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
         if i < num_plots:  # empty image https://stackoverflow.com/a/30073252
             target_name = feature_names[i]
             labels = [f for f in feature_names if f != target_name]
-            func(ax[row, col], values[target_name], target_name, labels)
+            func(ax[row, col], values[target_name], target_name, labels, **extra_args)
         else:
             blank(ax[row, col])
         col += 1
