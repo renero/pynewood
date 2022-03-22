@@ -464,3 +464,47 @@ def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
     plt.suptitle(title)
     plt.tight_layout()
     plt.show()
+
+
+# https://stackoverflow.com/a/4983359/892904
+def non_increasing(L):
+    return all(x >= y for x, y in zip(L, L[1:]))
+
+
+def non_decreasing(L):
+    return all(x <= y for x, y in zip(L, L[1:]))
+
+
+def monotonic(L):
+    return non_increasing(L) or non_decreasing(L)
+
+
+def abrupt_change(X: np.array, tolerance: float = 0.1, verbose=False) -> int:
+    """
+    Given an array of values in increasing or decreasing order, detect what is the
+    element at which an abrupt change of more than `tolerance` is given. The
+    tolerance is expressed as a percentage of the range between max and min values
+    in the series.
+
+    Arguments:
+        - X (np.array): the series of values to detect the abrupt change.
+        - tolerance (float): the max percentage of change tolerated.
+        - verbose (bool): Verbose output.
+
+    Returns:
+        The position in the array where an abrupt change is produced. If there's
+            no change in consecutive values greater than the tolerance passed then
+            the last element of the array is returned.
+    """
+    assert monotonic(X), "The series is not monotonic"
+    prev = X[0]
+    interval = max(X) - min(X)
+    for cutoff, x in enumerate(X):
+        delta = np.abs((prev - x) / interval)
+        if verbose:
+            print(f"pos.{cutoff:02d} ({x:.3f}), ∂={delta * 100.0:+.2f}")
+        if delta > tolerance:
+            break
+        prev = x
+
+    return cutoff
