@@ -499,10 +499,12 @@ def abrupt_change(X: np.array, tolerance: float = 0.1, verbose=False) -> int:
     assert monotonic(X), "The series is not monotonic"
     prev = X[0]
     interval = max(X) - min(X)
+    if verbose:
+        print(f"Tolerance: {tolerance*100}%")
     for cutoff, x in enumerate(X):
         delta = np.abs((prev - x) / interval)
         if verbose:
-            print(f"pos.{cutoff:02d} ({x:.3f}), ∂={delta * 100.0:+.2f}")
+            print(f"- pos.{cutoff:02d} ({x:.4f}), ∂={delta * 100.0:+.2f}")
         if delta > tolerance:
             break
         prev = x
