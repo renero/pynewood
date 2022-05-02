@@ -1,4 +1,3 @@
-import argparse
 import networkx as nx
 
 from scc.remove_cycles_by_hierarchy_greedy import scc_based_to_remove_cycle_edges_iterately
@@ -18,22 +17,18 @@ def get_edges_voting_scores(set_edges_list):
 
 
 def remove_cycle_edges_strategies(
-    graph_file, nodes_score_dict, score_name="socialagony", nodetype=int
+    graph, nodes_score_dict, score_name="trueskill"
 ):
-
-    g = nx.read_edgelist(
-        graph_file, create_using=nx.DiGraph(), nodetype=nodetype)
+    g = graph.copy()
     # greedy
     e1 = scc_based_to_remove_cycle_edges_iterately(g, nodes_score_dict)
-    g = nx.read_edgelist(
-        graph_file, create_using=nx.DiGraph(), nodetype=nodetype)
+    g = graph.copy()
     # forward
     e2 = remove_cycle_edges_BF_iterately(
         g, nodes_score_dict, is_Forward=True, score_name=score_name
     )
     # backward
-    g = nx.read_edgelist(
-        graph_file, create_using=nx.DiGraph(), nodetype=nodetype)
+    g = graph.copy()
     e3 = remove_cycle_edges_BF_iterately(
         g, nodes_score_dict, is_Forward=False, score_name=score_name
     )
@@ -47,36 +42,22 @@ def remove_cycle_edges_by_voting(graph_file, set_edges_list, nodetype=int):
     return e
 
 
-def remove_cycle_edges_by_hierarchy(
-    graph_file, nodes_score_dict, score_name="socialagony", nodetype=int
-):
+def remove_cycle_edges_by_hierarchy(graph, nodes_score_dict):
     e1, e2, e3 = remove_cycle_edges_strategies(
-        graph_file, nodes_score_dict, score_name=score_name, nodetype=nodetype
+        graph, nodes_score_dict, score_name="trueskill"
     )
     e4 = remove_cycle_edges_by_voting(
-        graph_file, [set(e1), set(e2), set(e3)], nodetype=nodetype
+        graph, [set(e1), set(e2), set(e3)]
     )
     return e1, e2, e3, e4
 
 
-def computing_hierarchy(graph_file, players_score_func_name, nodetype=int):
-    g = nx.read_edgelist(
-        graph_file, create_using=nx.DiGraph(), nodetype=nodetype)
+def breaking_cycles_by_hierarchy_performance(graph, nodetype=int):
     print("start computing trueskill...")
-    players = graphbased_trueskill(g)
+    players_score_dict = graphbased_trueskill(graph)
 
-    return players
+    e1, e2, e3, e4 = remove_cycle_edges_by_hierarchy(graph, players_score_dict)
 
-
-def breaking_cycles_by_hierarchy_performance(
-    graph_file, gt_file, players_score_name="trueskill", nodetype=int
-):
-    players_score_dict = computing_hierarchy(
-        graph_file, players_score_name, nodetype=nodetype
-    )
-    e1, e2, e3, e4 = remove_cycle_edges_by_hierarchy(
-        graph_file, players_score_dict, players_score_name, nodetype=nodetype
-    )
     print(f"TS_G,    removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
     print(f"TS_F,    removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
     print(f"TS_B,    removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
@@ -86,16 +67,7 @@ def breaking_cycles_by_hierarchy_performance(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-g", "--graph_file", default=" ",
-                        help="input graph file name (edges list)")
-    parser.add_argument("-t", "--gt_edges_file", default=None,
-                        help="ground truth edges file")
-
-    args = parser.parse_args()
-    graph_file = args.graph_file
-    gt_file = args.gt_edges_file
-
+    graph_file = "/Users/renero/phd/code/breaking_cycles_in_noisy_hierarchies/mydata/g_rfe.edges"
     graph = nx.read_edgelist(
         graph_file, create_using=nx.DiGraph(), nodetype=int)
     n_cycles = len(list(nx.simple_cycles(graph)))
@@ -103,8 +75,7 @@ if __name__ == "__main__":
     for cycle in nx.simple_cycles(graph):
         print(cycle)
 
-    e1, e2, e3, e4 = breaking_cycles_by_hierarchy_performance(
-        graph_file, gt_file)
+    e1, e2, e3, e4 = breaking_cycles_by_hierarchy_performance(graph)
     for u, v in e4:
         graph.remove_edge(u, v)
 
