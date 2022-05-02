@@ -35,14 +35,13 @@ def remove_cycle_edges_strategies(
     return e1, e2, e3
 
 
-def remove_cycle_edges_by_voting(graph_file, set_edges_list, nodetype=int):
+def remove_cycle_edges_by_voting(graph, set_edges_list, nodetype=int):
     edges_score = get_edges_voting_scores(set_edges_list)
-    e = remove_cycle_edges_heuristic(
-        graph_file, edges_score, nodetype=nodetype)
+    e = remove_cycle_edges_heuristic(graph, edges_score)
     return e
 
 
-def remove_cycle_edges_by_hierarchy(graph, nodes_score_dict):
+def remove_cycle_edges_by_hierarchy(graph: nx.DiGraph, nodes_score_dict, verbose=False):
     e1, e2, e3 = remove_cycle_edges_strategies(
         graph, nodes_score_dict, score_name="trueskill"
     )
@@ -52,16 +51,23 @@ def remove_cycle_edges_by_hierarchy(graph, nodes_score_dict):
     return e1, e2, e3, e4
 
 
-def breaking_cycles_by_hierarchy_performance(graph, nodetype=int):
-    print("start computing trueskill...")
-    players_score_dict = graphbased_trueskill(graph)
+def break_cycles(graph: nx.DiGraph, verbose=False):
+    if verbose:
+        print("start computing trueskill...")
+    players_score_dict = graphbased_trueskill(graph, verbose=verbose)
 
-    e1, e2, e3, e4 = remove_cycle_edges_by_hierarchy(graph, players_score_dict)
+    e1, e2, e3, e4 = remove_cycle_edges_by_hierarchy(
+        graph, players_score_dict, verbose=verbose)
 
-    print(f"TS_G,    removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
-    print(f"TS_F,    removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
-    print(f"TS_B,    removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
-    print(f"TS_Vote, removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
+    if verbose:
+        print(
+            f"TS_G,    removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
+        print(
+            f"TS_F,    removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
+        print(
+            f"TS_B,    removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
+        print(
+            f"TS_Vote, removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
 
     return e1, e2, e3, e4
 
@@ -75,7 +81,7 @@ if __name__ == "__main__":
     for cycle in nx.simple_cycles(graph):
         print(cycle)
 
-    e1, e2, e3, e4 = breaking_cycles_by_hierarchy_performance(graph)
+    e1, e2, e3, e4 = break_cycles(graph, verbose=True)
     for u, v in e4:
         graph.remove_edge(u, v)
 

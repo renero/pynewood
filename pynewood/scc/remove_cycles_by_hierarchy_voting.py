@@ -43,7 +43,7 @@ def scc_based_to_remove_cycle_edges_iterately(g, edges_score):
     return edges_to_be_removed
 
 
-def remove_cycle_edges_heuristic(graph, edges_score, nodetype=int):
+def remove_cycle_edges_heuristic(graph: nx.DiGraph, edges_score):
     self_loops = remove_self_loops_from_graph(graph)
 
     edges_to_be_removed = scc_based_to_remove_cycle_edges_iterately(

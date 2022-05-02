@@ -44,7 +44,7 @@ def nodes_in_scc(sccs):
     return scc_nodes
 
 
-def scc_nodes_edges(g):
+def scc_nodes_edges(g, verbose=False):
     scc_nodes = set()
     scc_edges = set()
     num_big_sccs = 0
@@ -63,18 +63,21 @@ def scc_nodes_edges(g):
                 biggest_scc = sub
     nonscc_nodes = set(g.nodes()) - scc_nodes
     nonscc_edges = set(g.edges()) - scc_edges
-    print(num_nodes_biggest_scc)
-    print("num of big sccs: %d" % num_big_sccs)
     if biggest_scc == None:
         return scc_nodes, scc_nodes, nonscc_nodes, nonscc_edges
-    print("# nodes in biggest scc: %d, # edges in biggest scc: %d" %
-          (biggest_scc.number_of_nodes(), biggest_scc.number_of_edges()))
-    print("# nodes,edges in scc: (%d,%d), # nodes, edges in non-scc: (%d,%d) " %
-          (len(scc_nodes), len(scc_edges), len(nonscc_nodes), len(nonscc_edges)))
     num_of_nodes = g.number_of_nodes()
     num_of_edges = g.number_of_edges()
-    print("# nodes in graph: %d, # of edges in graph: %d, percentage nodes, edges in scc: (%0.4f,%0.4f), percentage nodes, edges in non-scc: (%0.4f,%0.4f)" %
-          (num_of_nodes, num_of_edges, len(scc_nodes)*1.0/num_of_nodes, len(scc_edges)*1.0/num_of_edges, len(nonscc_nodes)*1.0/num_of_nodes, len(nonscc_edges)*1.0/num_of_edges))
+
+    if verbose:
+        print(num_nodes_biggest_scc)
+        print("num of big sccs: %d" % num_big_sccs)
+        print("# nodes in biggest scc: %d, # edges in biggest scc: %d" %
+            (biggest_scc.number_of_nodes(), biggest_scc.number_of_edges()))
+        print("# nodes,edges in scc: (%d,%d), # nodes, edges in non-scc: (%d,%d) " %
+            (len(scc_nodes), len(scc_edges), len(nonscc_nodes), len(nonscc_edges)))
+        print("# nodes in graph: %d, # of edges in graph: %d, percentage nodes, edges in scc: (%0.4f,%0.4f), percentage nodes, edges in non-scc: (%0.4f,%0.4f)" %
+            (num_of_nodes, num_of_edges, len(scc_nodes)*1.0/num_of_nodes, len(scc_edges)*1.0/num_of_edges, len(nonscc_nodes)*1.0/num_of_nodes, len(nonscc_edges)*1.0/num_of_edges))
+
     return scc_nodes, scc_edges, nonscc_nodes, nonscc_edges
 
 
