@@ -407,7 +407,7 @@ def split_data(data: np.ndarray, train_percentage: float = 0.8):
 
 
 def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
-                   title="Multiplot", extra_args:Dict={}, **kwargs):
+                   title="Multiplot", extra_args: Dict = {}, **kwargs):
     """
     Plots multiple plots in a multiline fashion. For each plot the method `func` is
     called to produce each individual plot. The dictionary `values` contains pairs
@@ -457,7 +457,8 @@ def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
         if i < num_plots:  # empty image https://stackoverflow.com/a/30073252
             target_name = feature_names[i]
             labels = [f for f in feature_names if f != target_name]
-            func(ax[row, col], values[target_name], target_name, labels, **extra_args)
+            func(ax[row, col], values[target_name],
+                 target_name, labels, **extra_args)
         else:
             blank(ax[row, col])
         col += 1
@@ -510,3 +511,42 @@ def abrupt_change(X: np.array, tolerance: float = 0.1, verbose=False) -> int:
         prev = x
 
     return cutoff
+
+
+def smooth_curve(x, window_len=11, window='hamming'):
+    """
+    Smooths a 1D array using a window with requested size.
+
+    Args:
+        x (np.array): A 1D array to smooth.
+        window_len (int, optional): Length of the smoothing window. Defaults to 11.
+        window (str, optional): Type of smoothing algorithm. Possible options are. 
+            'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
+            Defaults to 'hamming'.
+
+    Raises:
+        ValueError: If the array is not 1D.
+        ValueError: If window is greater than the length of the array.
+        ValueError: If window is not one of the allowed values.
+
+    Returns:
+        numpy.array: The array smoothed
+    """
+    if x.ndim != 1:
+        raise ValueError("smooth only accepts 1 dimension arrays.")
+    if x.size < window_len:
+        raise ValueError(
+            "Input vector needs to be bigger than window size.")
+    if window_len < 3:
+        return x
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError(
+            "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
+    s = np.r_[2*x[0]-x[window_len-1::-1], x, 2*x[-1]-x[-1:-window_len:-1]]
+    if window == 'flat':  # moving average
+        w = np.ones(window_len, 'd')
+    else:
+        w = eval('np.'+window+'(window_len)')
+    y = np.convolve(w/w.sum(), s, mode='same')
+
+    return y[window_len:-window_len+1]
