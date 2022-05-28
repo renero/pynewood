@@ -205,3 +205,4 @@ notebooks/simple_predictor
 notebooks/mlruns
 .flake8
 Turtle trading.ipynb
+launch.json
