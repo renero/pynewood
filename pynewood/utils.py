@@ -497,7 +497,7 @@ def abrupt_change(X: np.array, tolerance: float = 0.1, verbose=False) -> int:
             no change in consecutive values greater than the tolerance passed then
             the last element of the array is returned.
     """
-    assert monotonic(X), "The series is not monotonic"
+    # assert monotonic(X), "The series is not monotonic"
     prev = X[0]
     interval = max(X) - min(X)
     if verbose:
