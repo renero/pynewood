@@ -4,10 +4,10 @@
 
 import networkx as nx
 
-from .scc.remove_cycles_by_hierarchy_greedy import scc_based_to_remove_cycle_edges_iterately
-from .scc.remove_cycles_by_hierarchy_BF import remove_cycle_edges_BF_iterately
-from .scc.remove_cycles_by_hierarchy_voting import remove_cycle_edges_heuristic
-from .scc.true_skill import graphbased_trueskill
+from pynewood.scc.remove_cycles_by_hierarchy_greedy import scc_based_to_remove_cycle_edges_iterately
+from pynewood.scc.remove_cycles_by_hierarchy_BF import remove_cycle_edges_BF_iterately
+from pynewood.scc.remove_cycles_by_hierarchy_voting import remove_cycle_edges_heuristic
+from pynewood.scc.true_skill import graphbased_trueskill
 
 
 def _get_edges_voting_scores(set_edges_list):
