@@ -1,3 +1,4 @@
+from typing import List
 import os
 import string
 import random
@@ -10,7 +11,7 @@ import pydotplus
 
 from IPython.display import Image, display
 from pydot import Dot
-from typing import List
+from typing import List, Tuple
 
 from .graph_utils import graph_to_adjacency, AnyGraph
 
@@ -62,10 +63,7 @@ def dot_graph(
             else:
                 dot_str += f"{u} -> {v};\n"
         dot_str += "}\n"
-        # src = graphviz.Source(dot_str)
         dot_object = pydotplus.graph_from_dot_data(dot_str)
-        # old way of getting the dot_object
-        # > dot_object = nx.nx_pydot.to_pydot(G)
 
     # This is to display single arrows with two heads instead of two arrows with
     # one head towards each direction.
@@ -104,7 +102,8 @@ def dot_graphs(
     pngs = []
     label = "".join(random.choice(string.ascii_lowercase) for _ in range(6))
     for d, dag in enumerate(dags):
-        d_obj = dot_graph(dag, undirected=undirected, odots=odots, plot=False, **kwargs)
+        d_obj = dot_graph(dag, undirected=undirected,
+                          odots=odots, plot=False, **kwargs)
         output = f"./png/dag_{label}_{d}.png"
         if not os.path.exists("./png"):
             os.makedirs("./png")
@@ -122,9 +121,7 @@ def dot_graphs(
     for i in range(num_rows * num_cols):
         ax = fig.add_subplot(num_rows, num_cols, i + 1)
         if i >= len(pngs):  # empty image https://stackoverflow.com/a/30073252
-            npArray = np.array([[[255, 255, 255, 255]]], dtype="uint8")
-            ax.imshow(npArray, interpolation="nearest")
-            ax.set_axis_off()
+            empty_image(ax)
         else:
             ax.imshow(images[i])
             ax.set_title(f"{dag_names[i].upper()}")
@@ -134,6 +131,12 @@ def dot_graphs(
     fig.suptitle(title, fontsize=16)
     plt.tight_layout()
     plt.show()
+
+
+def empty_image(ax):
+    npArray = np.array([[[255, 255, 255, 255]]], dtype="uint8")
+    ax.imshow(npArray, interpolation="nearest")
+    ax.set_axis_off()
 
 
 def plot_dot(dot_object: pydot.Dot, **kwargs) -> None:
@@ -172,7 +175,7 @@ def dot_compared(g: AnyGraph, ref: AnyGraph, odots: bool = False) -> Dot:
             penwidth = 1
         if ref.has_edge(u, v) and not g.has_edge(v, u):
             dot_string += f'[penwidth={penwidth}, color="darkgreen"];\n'
-        elif g.has_edge(v, u) and (ref.has_edge(u,v) or ref.has_edge(v, u)):
+        elif g.has_edge(v, u) and (ref.has_edge(u, v) or ref.has_edge(v, u)):
             dot_string += f'[penwidth={penwidth}, color="darkgreen", '
             dot_string += f'style="dashed", {dir_options}];\n'
         elif ref.has_edge(v, u):
@@ -370,3 +373,139 @@ def plot_adjacency(g: nx.Graph, ax=None):
     ax.set_xticklabels(features)
     ax.set_yticks(range(num_features))
     ax.set_yticklabels(features)
+
+#
+#
+# Method to draw comparison between two graphs: draw_comparison()
+#
+#
+
+
+def cleanup_graph(G: nx.DiGraph) -> nx.DiGraph:
+    if '\\n' in G.nodes:
+        G.remove_node('\\n')
+    return G
+
+
+def format_graph(
+    G: nx.DiGraph,
+    Gt: nx.DiGraph,
+    ok_color="green",
+    inv_color="lightgreen",
+    wrong_color="black"
+) -> nx.DiGraph:
+    for u, v in G.edges():
+        if Gt.has_edge(u, v):
+            G[u][v]['color'] = ok_color
+            G[u][v]['width'] = 3.0
+        elif Gt.has_edge(v, u):
+            G[u][v]['color'] = inv_color
+            G[u][v]['width'] = 2.0
+        else:
+            G[u][v]['color'] = wrong_color
+            G[u][v]['width'] = 1.0
+    return G
+
+
+def fix_graph_scale(ax, pos, node_size=300):
+    node_radius = (node_size / 3.14159265359)**0.5
+
+    def get_ax_size(ax):
+        bbox = ax.get_window_extent().transformed(ax.figure.dpi_scale_trans.inverted())
+        width, height = bbox.width, bbox.height
+        width *= 72
+        height *= 72
+        return width, height
+
+    min_x = min(i_pos[0] for i_pos in pos.values())
+    max_x = max(i_pos[0] for i_pos in pos.values())
+    min_y = min(i_pos[1] for i_pos in pos.values())
+    max_y = max(i_pos[1] for i_pos in pos.values())
+
+    ax_size_x, ax_size_y = get_ax_size(ax)
+    points_to_x_axis = (max_x - min_x)/(ax_size_x-node_radius*2)
+    points_to_y_axis = (max_y - min_y)/(ax_size_y-node_radius*2)
+    node_radius_in_x_axis = node_radius * points_to_x_axis
+    node_radius_in_y_axis = node_radius * points_to_y_axis
+
+    ax_min_x = min_x - node_radius_in_x_axis
+    ax_max_x = max_x + node_radius_in_x_axis
+    ax_min_y = min_y - node_radius_in_y_axis
+    ax_max_y = max_y + node_radius_in_y_axis
+
+    ax.set_xlim([ax_min_x, ax_max_x])
+    ax.set_ylim([ax_min_y, ax_max_y])
+
+
+def draw_graph_subplot(G: nx.DiGraph, layout: dict, title: str, ax: plt.Axes):
+    colors = list(nx.get_edge_attributes(G, 'color').values())
+    widths = list(nx.get_edge_attributes(G, 'width').values())
+    nx.draw(G, pos=layout, edge_color=colors,
+            node_size=1200, node_color='white', edgecolors="black", width=widths,
+            font_size=10, font_weight='bold', with_labels=True, ax=ax)
+    ax.set_title(title, y=-0.1)
+
+
+def add_boxes(f: plt.Figure):
+    rect1 = plt.Rectangle(
+        # (lower-left corner), width, height
+        (0.02, 0.06), 0.48, .95, fill=False, color="k", lw=1,
+        zorder=1000, transform=f.transFigure, figure=f
+    )
+    rect2 = plt.Rectangle(
+        # (lower-left corner), width, height
+        (0.51, 0.06), 0.48, .95, fill=False, color="k", lw=1,
+        zorder=1000, transform=f.transFigure, figure=f
+    )
+    f.patches.extend([rect1])
+    f.patches.extend([rect2])
+
+
+def draw_comparison(
+        dag: nx.DiGraph,
+        reference: nx.DiGraph,
+        names: List[str] = ["Ground truth", "Prediction"],
+        figsize: Tuple[int, int] = (10, 5)
+):
+    """
+    Compare two graphs using dot.
+
+    Args:
+        dag: The DAG to compare.
+    """
+    G = cleanup_graph(dag.copy())
+    Gt = cleanup_graph(reference.copy())
+    for missing in set(list(Gt.nodes)) - set(list(G.nodes)):
+        G.add_node(missing)
+
+    G = format_graph(G, Gt, inv_color="orange", wrong_color="gray")
+    Gt = format_graph(Gt, G, inv_color="lightgreen", wrong_color="black")
+
+    f, ax = plt.subplots(ncols=2, figsize=figsize)
+    layout = nx.nx_pydot.graphviz_layout(Gt)
+    draw_graph_subplot(Gt, layout=layout, title=names[1], ax=ax[0])
+    draw_graph_subplot(G, layout=layout, title=names[0], ax=ax[1])
+    add_boxes(f)
+
+    fix_graph_scale(ax[1], nx.nx_pydot.graphviz_layout(Gt), node_size=1200)
+    plt.tight_layout()
+    plt.show()
+
+
+def draw_graph(dag: nx.DiGraph,
+               layout: callable = nx.circular_layout,
+               figsize: Tuple[int, int] = (5, 5)):
+    G = cleanup_graph(dag.copy())
+    fig = plt.figure(figsize=figsize)
+    ax = plt.subplot(111)
+    pos = layout(G)
+    nx.draw(G, pos=pos, node_size=1200, node_color='white', edgecolors="black",
+            font_size=10, font_weight='bold', with_labels=True, ax=ax)
+    rect = plt.Rectangle(
+        # (lower-left corner), width, height
+        (0.02, 0.02), 0.96, .96, fill=False, color="k", lw=1,
+        zorder=1000, transform=fig.transFigure, figure=fig
+    )
+    fig.patches.extend([rect])
+    plt.tight_layout()
+    plt.show()

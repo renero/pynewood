@@ -281,7 +281,10 @@ def graph_to_adjacency_file(graph: AnyGraph, output_file: Union[Path, str]):
 def graph_from_dot_file(dot_file: Union[str, Path]) -> nx.DiGraph:
     """ Returns a NetworkX DiGraph from a DOT FILE. """
     dot_object = pydot.graph_from_dot_file(dot_file)
-    dotplus = pydotplus.graph_from_dot_data(dot_object[0].to_string())
+    dot_string = dot_object[0].to_string()
+    dot_string = dot_string.replace('\"\\n\"', '')
+    dot_string = dot_string.replace("\n;\n", "\n")
+    dotplus = pydotplus.graph_from_dot_data(dot_string)
     dotplus.set_strict(True)
     return nx.nx_pydot.from_pydot(dotplus)
 
