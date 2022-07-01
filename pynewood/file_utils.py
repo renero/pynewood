@@ -260,13 +260,14 @@ def load_experiment(obj_name: str, folder: str):
     Loads a pickle from a given folder name. It is not necessary to add the "pickle"
     extension to the experiment name.
 
-    Args:
-        obj_name (str): The name of the object saved in pickle format that is to be
-            loaded.
-        folder (str): A full path where looking for the experiment object.
+    Parameters:
+    -----------
+    obj_name (str): The name of the object saved in pickle format that is to be loaded.
+    folder (str): A full path where looking for the experiment object.
 
     Returns:
-        An obj loaded from a pickle file.
+    --------
+    An obj loaded from a pickle file.
     """
     if Path(obj_name).suffix == "" or Path(obj_name).suffix != "pickle":
         ext = ".pickle"

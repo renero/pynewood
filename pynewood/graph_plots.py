@@ -380,6 +380,14 @@ def plot_adjacency(g: nx.Graph, ax=None):
 #
 #
 
+formatting_kwargs = {"node_size": 500,
+                     "node_color": 'white',
+                     "edgecolors": "black",
+                     "font_family": "monospace",
+                     "horizontalalignment": "center",
+                     "verticalalignment": "center_baseline",
+                     "with_labels": True
+                    }
 
 def cleanup_graph(G: nx.DiGraph) -> nx.DiGraph:
     if '\\n' in G.nodes:
@@ -440,21 +448,20 @@ def fix_graph_scale(ax, pos, node_size=300):
 def draw_graph_subplot(G: nx.DiGraph, layout: dict, title: str, ax: plt.Axes):
     colors = list(nx.get_edge_attributes(G, 'color').values())
     widths = list(nx.get_edge_attributes(G, 'width').values())
-    nx.draw(G, pos=layout, edge_color=colors,
-            node_size=1200, node_color='white', edgecolors="black", width=widths,
-            font_size=10, font_weight='bold', with_labels=True, ax=ax)
+    nx.draw(G, pos=layout, edge_color=colors, width=widths,
+            **formatting_kwargs, ax=ax)
     ax.set_title(title, y=-0.1)
 
 
 def add_boxes(f: plt.Figure):
     rect1 = plt.Rectangle(
         # (lower-left corner), width, height
-        (0.02, 0.06), 0.48, .95, fill=False, color="k", lw=1,
+        (0.02, 0.1), 0.46, .86, fill=False, color="k", lw=1,
         zorder=1000, transform=f.transFigure, figure=f
     )
     rect2 = plt.Rectangle(
         # (lower-left corner), width, height
-        (0.51, 0.06), 0.48, .95, fill=False, color="k", lw=1,
+        (0.5, 0.1), 0.48, .86, fill=False, color="k", lw=1,
         zorder=1000, transform=f.transFigure, figure=f
     )
     f.patches.extend([rect1])
@@ -465,14 +472,28 @@ def draw_comparison(
         dag: nx.DiGraph,
         reference: nx.DiGraph,
         names: List[str] = ["Ground truth", "Prediction"],
-        figsize: Tuple[int, int] = (10, 5)
-):
+        figsize: Tuple[int, int] = (10, 5),
+        **kwargs):
     """
     Compare two graphs using dot.
 
     Args:
-        dag: The DAG to compare.
+    dag: The DAG to compare.
+    reference: The reference DAG.
+    names: The names of the graphs.
+    figsize: The size of the figure.
+    **kwargs: Additional arguments to format the graphs:
+        - "node_size": 500
+        - "node_color": 'white'
+        - "edgecolors": "black"
+        - "font_family": "monospace"
+        - "horizontalalignment": "center"
+        - "verticalalignment": "center_baseline"
+        - "with_labels": True
     """
+    # Overwrite formatting_kwargs with kwargs if they are provided
+    formatting_kwargs.update(kwargs)
+
     G = cleanup_graph(dag.copy())
     Gt = cleanup_graph(reference.copy())
     for missing in set(list(Gt.nodes)) - set(list(G.nodes)):
@@ -482,30 +503,47 @@ def draw_comparison(
     Gt = format_graph(Gt, G, inv_color="lightgreen", wrong_color="black")
 
     f, ax = plt.subplots(ncols=2, figsize=figsize)
-    layout = nx.nx_pydot.graphviz_layout(Gt)
-    draw_graph_subplot(Gt, layout=layout, title=names[1], ax=ax[0])
-    draw_graph_subplot(G, layout=layout, title=names[0], ax=ax[1])
-    add_boxes(f)
+    ref_layout = nx.drawing.nx_agraph.graphviz_layout(Gt, prog="dot")
+    draw_graph_subplot(Gt, layout=ref_layout, title=names[1], ax=ax[0])
+    draw_graph_subplot(G, layout=ref_layout, title=names[0], ax=ax[1])
 
-    fix_graph_scale(ax[1], nx.nx_pydot.graphviz_layout(Gt), node_size=1200)
-    plt.tight_layout()
     plt.show()
 
 
 def draw_graph(dag: nx.DiGraph,
-               layout: callable = nx.circular_layout,
-               figsize: Tuple[int, int] = (5, 5)):
+               reference: nx.DiGraph = None,
+               figsize: Tuple[int, int] = (5, 5),
+               **kwargs):
+    """
+    Compare two graphs using dot.
+
+    Arguments:
+    dag: The DAG to compare.
+    reference: The reference DAG. Default is None. This one is used to copy the layout
+        of the nodes.
+    figsize: The size of the figure. Default is (5, 5).
+    
+    Optional arguments: to define graph formatting.
+        - "node_size": 500
+        - "node_color": 'white'
+        - "edgecolors": "black"
+        - "font_family": "monospace"
+        - "horizontalalignment": "center"
+        - "verticalalignment": "center_baseline"
+        - "with_labels": True
+    """
     G = cleanup_graph(dag.copy())
+
+    # Overwrite formatting_kwargs with kwargs if they are provided
+    formatting_kwargs.update(kwargs)
+
     fig = plt.figure(figsize=figsize)
     ax = plt.subplot(111)
-    pos = layout(G)
-    nx.draw(G, pos=pos, node_size=1200, node_color='white', edgecolors="black",
-            font_size=10, font_weight='bold', with_labels=True, ax=ax)
-    rect = plt.Rectangle(
-        # (lower-left corner), width, height
-        (0.02, 0.02), 0.96, .96, fill=False, color="k", lw=1,
-        zorder=1000, transform=fig.transFigure, figure=fig
-    )
-    fig.patches.extend([rect])
+    if reference is not None:
+        pos = nx.drawing.nx_agraph.graphviz_layout(reference, prog="dot")
+    else:
+        pos = nx.drawing.nx_agraph.graphviz_layout(G, prog="dot")
+    nx.draw(G, pos=pos, **formatting_kwargs, ax=ax)
+
     plt.tight_layout()
     plt.show()
