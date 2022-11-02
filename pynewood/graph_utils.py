@@ -169,6 +169,9 @@ def graph_to_adjacency(graph: AnyGraph, weight_label: str = "weight") -> numpy.n
     """
     symbol_map = {"o": 1, ">": 2, "-": 3}
     labels = sorted(list(graph.nodes))  # [node for node in self]
+    # Fix for the case where an empty node is parsed from the .dot file
+    if '\\n' in labels:
+        labels.remove('\\n')
     mat = np.zeros((len(labels), (len(labels))))
     for x in labels:
         for y in labels:
