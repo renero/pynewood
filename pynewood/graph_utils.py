@@ -172,7 +172,7 @@ def graph_to_adjacency(graph: AnyGraph,
     symbol_map = {"o": 1, ">": 2, "-": 3}
     labels = sorted(list(graph.nodes))  # [node for node in self]
     # Double check if all nodes are in the graph
-    if node_names:
+    if node_names is not None:
         for n in list(node_names):
             if n not in set(labels):
                 labels.append(n)
