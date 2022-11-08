@@ -187,6 +187,7 @@ def graph_to_adjacency(graph: AnyGraph, weight_label: str = "weight") -> numpy.n
                         )[weight_label]
                 else:
                     mat[labels.index(x)][labels.index(y)] = 1
+    mat[np.isnan(mat)] = 0
     return mat
 
 
