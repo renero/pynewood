@@ -4,7 +4,7 @@ This module incorporates util functions for graphs.
 from pathlib import Path
 
 from deprecated import deprecated
-from typing import List, Union, Tuple, Dict, Callable, Set
+from typing import List, Optional, Union, Tuple, Dict, Callable, Set
 
 import networkx as nx
 import numpy
@@ -154,7 +154,9 @@ def graph_print_edges(graph: nx.Graph):
                 edge[0], edge[1]))
 
 
-def graph_to_adjacency(graph: AnyGraph, weight_label: str = "weight") -> numpy.ndarray:
+def graph_to_adjacency(graph: AnyGraph,
+                       node_names: Optional[List[str]] = None,
+                       weight_label: str = "weight") -> numpy.ndarray:
     """
     A method to generate the adjacency matrix of the graph. Labels are
     sorted for better readability.
@@ -169,6 +171,12 @@ def graph_to_adjacency(graph: AnyGraph, weight_label: str = "weight") -> numpy.n
     """
     symbol_map = {"o": 1, ">": 2, "-": 3}
     labels = sorted(list(graph.nodes))  # [node for node in self]
+    # Double check if all nodes are in the graph
+    if node_names:
+        for n in list(node_names):
+            if n not in set(labels):
+                labels.append(n)
+        labels = sorted(labels)
     # Fix for the case where an empty node is parsed from the .dot file
     if '\\n' in labels:
         labels.remove('\\n')
@@ -215,9 +223,11 @@ def graph_from_adjacency(
     G.add_nodes_from(range(adjacency.shape[1]))
 
     # What to do with absolute values?
-    not_abs = lambda x: x
+    def not_abs(x): return x
     w_val = np.abs if absolute_values else not_abs
-    weight_gt = lambda w, thresh: w != 0.0 if thresh is None else w_val(w) > thresh
+
+    def weight_gt(w, thresh): return w != 0.0 if thresh is None else w_val(
+        w) > thresh
 
     # A method to check if weight is greater than threshold, only if has been specified
     # def check_weight(w_val, threshold):
@@ -233,7 +243,8 @@ def graph_from_adjacency(
                     G.add_edge(i, j, weight=w_val(adjacency[j][i]))
             else:
                 if weight_gt(value, th):
-                    G.add_edge(i, j, weight=w_val(value))  # , arrowhead="normal")
+                    # , arrowhead="normal")
+                    G.add_edge(i, j, weight=w_val(value))
     # Map the current column numbers to the letters used in toy dataset
     if node_labels is not None and len(node_labels) == adjacency.shape[1]:
         mapping = dict(zip(sorted(G), node_labels))
@@ -243,7 +254,7 @@ def graph_from_adjacency(
 
 
 def graph_from_adjacency_file(file: Union[Path, str], th=0.0) -> Tuple[
-    nx.DiGraph, pd.DataFrame]:
+        nx.DiGraph, pd.DataFrame]:
     """
     Read Adjacency matrix from a file and return a Graph
 
