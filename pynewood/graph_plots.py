@@ -469,18 +469,19 @@ def add_boxes(f: plt.Figure):
 
 
 def draw_comparison(
-        dag: nx.DiGraph,
         reference: nx.DiGraph,
+        dag: nx.DiGraph,
         names: List[str] = ["Ground truth", "Prediction"],
         figsize: Tuple[int, int] = (10, 5),
         **kwargs):
     """
     Compare two graphs using dot.
 
-    Args:
-    dag: The DAG to compare.
+    Parameters:
+    -----------
     reference: The reference DAG.
-    names: The names of the graphs.
+    dag: The DAG to compare.
+    names: The names of the reference graph and the dag.
     figsize: The size of the figure.
     **kwargs: Additional arguments to format the graphs:
         - "node_size": 500
@@ -499,13 +500,13 @@ def draw_comparison(
     for missing in set(list(Gt.nodes)) - set(list(G.nodes)):
         G.add_node(missing)
 
-    G = format_graph(G, Gt, inv_color="orange", wrong_color="gray")
     Gt = format_graph(Gt, G, inv_color="lightgreen", wrong_color="black")
+    G = format_graph(G, Gt, inv_color="orange", wrong_color="gray")
 
     f, ax = plt.subplots(ncols=2, figsize=figsize)
     ref_layout = nx.drawing.nx_agraph.graphviz_layout(Gt, prog="dot")
-    draw_graph_subplot(Gt, layout=ref_layout, title=names[1], ax=ax[0])
-    draw_graph_subplot(G, layout=ref_layout, title=names[0], ax=ax[1])
+    draw_graph_subplot(Gt, layout=ref_layout, title=names[0], ax=ax[0])
+    draw_graph_subplot(G, layout=ref_layout, title=names[1], ax=ax[1])
 
     plt.show()
 
