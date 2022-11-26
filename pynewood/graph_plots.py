@@ -381,7 +381,7 @@ def plot_adjacency(g: nx.Graph, ax=None):
 #
 
 formatting_kwargs = {"node_size": 500,
-                     "node_color": 'white',
+                     "node_color": "white",
                      "edgecolors": "black",
                      "font_family": "monospace",
                      "horizontalalignment": "center",
