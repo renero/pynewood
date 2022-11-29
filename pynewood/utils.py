@@ -17,6 +17,7 @@ from scipy.special import expit  # this is the sigmoid function
 from scipy.stats import norm, lognorm
 from sklearn.preprocessing import RobustScaler
 
+from causalGraph.common.fig_config import figure_features, add_grid
 
 class betterdict(defaultdict):
     """
@@ -442,7 +443,10 @@ def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
     feature_names = list(values.keys())
     num_plots = len(feature_names)
     num_rows = int(num_plots / num_cols) + int(num_plots % num_cols != 0)
-    fig, ax = plt.subplots(num_rows, num_cols, **kwargs)
+
+    figure_features()
+
+    fig, ax = plt.subplots(num_rows, num_cols, dpi=300, **kwargs)
     row, col = 0, 0
 
     def blank(ax):
@@ -462,6 +466,7 @@ def multiline_plot(values: Dict[str, Any], num_cols: int, func: Callable,
         else:
             blank(ax[row, col])
         col += 1
+
     plt.suptitle(title)
     plt.tight_layout()
     plt.show()
