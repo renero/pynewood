@@ -1,3 +1,3 @@
-__version__ = '0.3.12-dev0'
+__version__ = '0.3.13-dev0'
 
 from .config import config
