@@ -68,6 +68,7 @@ def dot_graph(
     # This is to display single arrows with two heads instead of two arrows with
     # one head towards each direction.
     dot_object.set_concentrate(True)
+    dot_object.del_node('"\\n"')
     if plot:
         plot_dot(dot_object, **kwargs)
 
