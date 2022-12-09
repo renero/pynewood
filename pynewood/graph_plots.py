@@ -13,6 +13,8 @@ from IPython.display import Image, display
 from pydot import Dot
 from typing import List, Tuple
 
+from pynewood.fig_config import figure_features
+
 from .graph_utils import graph_to_adjacency, AnyGraph
 
 
@@ -474,6 +476,7 @@ def draw_comparison(
         dag: nx.DiGraph,
         names: List[str] = ["Ground truth", "Prediction"],
         figsize: Tuple[int, int] = (10, 5),
+        dpi: int = 75,
         **kwargs):
     """
     Compare two graphs using dot.
@@ -504,6 +507,7 @@ def draw_comparison(
     Gt = format_graph(Gt, G, inv_color="lightgreen", wrong_color="black")
     G = format_graph(G, Gt, inv_color="orange", wrong_color="gray")
 
+    figure_features(dpi=dpi)
     f, ax = plt.subplots(ncols=2, figsize=figsize)
     ref_layout = nx.drawing.nx_agraph.graphviz_layout(Gt, prog="dot")
     draw_graph_subplot(Gt, layout=ref_layout, title=names[0], ax=ax[0])
