@@ -499,7 +499,9 @@ def draw_comparison(
     # Overwrite formatting_kwargs with kwargs if they are provided
     formatting_kwargs.update(kwargs)
 
-    G = cleanup_graph(dag.copy())
+    #G = cleanup_graph(dag.copy())
+    G = nx.DiGraph()
+    G.add_edges_from(dag.edges())
     Gt = cleanup_graph(reference.copy())
     for missing in set(list(Gt.nodes)) - set(list(G.nodes)):
         G.add_node(missing)
