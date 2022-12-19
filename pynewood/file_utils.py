@@ -5,6 +5,7 @@ import os
 import pickle
 from os.path import dirname, realpath, join
 from pathlib import Path
+from typing import Tuple
 
 import joblib
 import pandas as pd
@@ -123,7 +124,7 @@ def save_dataframe(name: str,
                    output_path: str,
                    cols_to_scale: list = None,
                    scaler_name: str = None,
-                   index: bool = True) -> (str, str):
+                   index: bool = True) -> Tuple[str, str]:
     """
     Save the data frame passed, with a valid output name in the output path
     scaling the columns specified, if applicable.
