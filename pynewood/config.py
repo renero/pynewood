@@ -18,7 +18,7 @@ from collections import defaultdict
 from os import getcwd
 from pathlib import Path
 
-from yaml import safe_load, YAMLError
+from yaml import YAMLError, safe_load
 
 from .logger import Logger
 from .utils import dict2table
