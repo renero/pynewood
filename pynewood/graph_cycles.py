@@ -85,7 +85,9 @@ def break_cycles(graph: nx.DiGraph, verbose=False):
             f"TS_Vote, removes: {len(e1)} edges; {', '.join([str(t) for t in e1])}")
 
     candidate_graph = nx.DiGraph()
-    candidate_graph.add_edges_from(graph.edges)
+    edge = list(graph.edges)
+    has_data = len(graph.get_edge_data(edge[0][0], edge[0][1])) != 0 
+    candidate_graph.add_edges_from(graph.edges(data=has_data))
     for u, v in e4:
         candidate_graph.remove_edge(u, v)
 

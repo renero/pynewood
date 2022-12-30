@@ -1,21 +1,19 @@
-from typing import List
 import os
-import string
 import random
+import string
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pydot
 import pydotplus
-
 from IPython.display import Image, display
 from pydot import Dot
-from typing import List, Tuple
 
 from pynewood.fig_config import figure_features
 
-from .graph_utils import graph_to_adjacency, AnyGraph
+from .graph_utils import AnyGraph, graph_to_adjacency
 
 
 def dot_graph(
@@ -502,7 +500,6 @@ def draw_comparison(
     # Overwrite formatting_kwargs with kwargs if they are provided
     formatting_kwargs.update(kwargs)
 
-    #G = cleanup_graph(dag.copy())
     G = nx.DiGraph()
     G.add_edges_from(dag.edges())
     Gt = cleanup_graph(reference.copy())
