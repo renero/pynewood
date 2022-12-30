@@ -496,6 +496,9 @@ def draw_comparison(
         - "verticalalignment": "center_baseline"
         - "with_labels": True
     """
+    if reference is None:
+        return
+        
     # Overwrite formatting_kwargs with kwargs if they are provided
     formatting_kwargs.update(kwargs)
 
