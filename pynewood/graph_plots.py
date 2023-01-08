@@ -550,7 +550,8 @@ def draw_graph(dag: nx.DiGraph,
     if reference is not None:
         pos = nx.drawing.nx_agraph.graphviz_layout(reference, prog="dot")
     else:
-        pos = nx.drawing.nx_agraph.graphviz_layout(G, prog="dot")
+        pos = nx.nx_pydot.pydot_layout(G)
+        # pos = nx.drawing.nx_agraph.graphviz_layout(G, prog="dot")
     nx.draw(G, pos=pos, **formatting_kwargs, ax=ax)
 
     plt.tight_layout()
