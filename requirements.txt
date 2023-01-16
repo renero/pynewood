@@ -30,7 +30,6 @@ pytorch-lightning
 pytorch-metric-learning
 PyYAML
 pyyaml
-sagemaker
 scikit
 scikit-learn
 scipy
