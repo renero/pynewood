@@ -408,15 +408,17 @@ def format_graph(
             G[u][v]['color'] = ok_color
             G[u][v]['width'] = 3.0
             G[u][v]['style'] = 'solid'
-            G[u][v]['alpha'] = 0.6
+            G[u][v]['alpha'] = 1.0
         elif Gt.has_edge(v, u):
             G[u][v]['color'] = inv_color
             G[u][v]['width'] = 2.0
             G[u][v]['style'] = 'solid'
+            G[u][v]['alpha'] = 0.8
         else:
             G[u][v]['color'] = wrong_color
             G[u][v]['width'] = 1.0
-            G[u][v]['style'] = 'dashed'
+            G[u][v]['style'] = '--'
+            G[u][v]['alpha'] = 0.6
     return G
 
 
@@ -453,7 +455,8 @@ def fix_graph_scale(ax, pos, node_size=300):
 def draw_graph_subplot(G: nx.DiGraph, layout: dict, title: str, ax: plt.Axes):
     colors = list(nx.get_edge_attributes(G, 'color').values())
     widths = list(nx.get_edge_attributes(G, 'width').values())
-    nx.draw(G, pos=layout, edge_color=colors, width=widths,
+    styles = list(nx.get_edge_attributes(G, 'style').values())
+    nx.draw(G, pos=layout, edge_color=colors, width=widths, style=styles,
             **formatting_kwargs, ax=ax)
     ax.set_title(title, y=-0.1)
 
@@ -510,8 +513,9 @@ def draw_comparison(
     for missing in set(list(Gt.nodes)) - set(list(G.nodes)):
         G.add_node(missing)
 
-    Gt = format_graph(Gt, G, inv_color="red", wrong_color="black")
+    Gt = format_graph(Gt, Gt, inv_color="red", wrong_color="black")
     G = format_graph(G, Gt, inv_color="red", wrong_color="gray")
+
     # Gt = format_graph(Gt, G, inv_color="lightgreen", wrong_color="black")
     # G = format_graph(G, Gt, inv_color="orange", wrong_color="gray")
 
