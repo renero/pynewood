@@ -407,12 +407,16 @@ def format_graph(
         if Gt.has_edge(u, v):
             G[u][v]['color'] = ok_color
             G[u][v]['width'] = 3.0
+            G[u][v]['style'] = 'solid'
+            G[u][v]['alpha'] = 0.6
         elif Gt.has_edge(v, u):
             G[u][v]['color'] = inv_color
             G[u][v]['width'] = 2.0
+            G[u][v]['style'] = 'solid'
         else:
             G[u][v]['color'] = wrong_color
             G[u][v]['width'] = 1.0
+            G[u][v]['style'] = 'dashed'
     return G
 
 
@@ -506,8 +510,10 @@ def draw_comparison(
     for missing in set(list(Gt.nodes)) - set(list(G.nodes)):
         G.add_node(missing)
 
-    Gt = format_graph(Gt, G, inv_color="lightgreen", wrong_color="black")
-    G = format_graph(G, Gt, inv_color="orange", wrong_color="gray")
+    Gt = format_graph(Gt, G, inv_color="red", wrong_color="black")
+    G = format_graph(G, Gt, inv_color="red", wrong_color="gray")
+    # Gt = format_graph(Gt, G, inv_color="lightgreen", wrong_color="black")
+    # G = format_graph(G, Gt, inv_color="orange", wrong_color="gray")
 
     figure_features(dpi=dpi)
     f, ax = plt.subplots(ncols=2, figsize=figsize)
