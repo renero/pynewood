@@ -9,6 +9,7 @@ import numpy as np
 import pydot
 import pydotplus
 from IPython.display import Image, display
+from matplotlib.backends.backend_pdf import PdfPages
 from pydot import Dot
 
 from pynewood.fig_config import figure_features
@@ -452,13 +453,14 @@ def fix_graph_scale(ax, pos, node_size=300):
     ax.set_ylim([ax_min_y, ax_max_y])
 
 
-def draw_graph_subplot(G: nx.DiGraph, layout: dict, title: str, ax: plt.Axes):
+def draw_graph_subplot(G: nx.DiGraph, layout: dict, title: str, ax: plt.Axes, **formatting_kwargs):
     colors = list(nx.get_edge_attributes(G, 'color').values())
     widths = list(nx.get_edge_attributes(G, 'width').values())
     styles = list(nx.get_edge_attributes(G, 'style').values())
     nx.draw(G, pos=layout, edge_color=colors, width=widths, style=styles,
             **formatting_kwargs, ax=ax)
-    ax.set_title(title, y=-0.1)
+    if title is not None:
+        ax.set_title(title, y=-0.1)
 
 
 def add_boxes(f: plt.Figure):
@@ -479,9 +481,10 @@ def add_boxes(f: plt.Figure):
 def draw_comparison(
         reference: nx.DiGraph,
         dag: nx.DiGraph,
-        names: List[str] = ["Ground truth", "Prediction"],
+        names: List[str] = ["Ground truth", "REX Prediction"],
         figsize: Tuple[int, int] = (10, 5),
         dpi: int = 75,
+        save_to_pdf: str = None,
         **kwargs):
     """
     Compare two graphs using dot.
@@ -519,13 +522,22 @@ def draw_comparison(
     # Gt = format_graph(Gt, G, inv_color="lightgreen", wrong_color="black")
     # G = format_graph(G, Gt, inv_color="orange", wrong_color="gray")
 
-    figure_features(dpi=dpi)
-    f, ax = plt.subplots(ncols=2, figsize=figsize)
-    ref_layout = nx.drawing.nx_agraph.graphviz_layout(Gt, prog="dot")
-    draw_graph_subplot(Gt, layout=ref_layout, title=names[0], ax=ax[0])
-    draw_graph_subplot(G, layout=ref_layout, title=names[1], ax=ax[1])
-
-    plt.show()
+    if save_to_pdf is not None:
+        with PdfPages(save_to_pdf) as pdf:
+            figure_features(dpi=dpi)
+            f, ax = plt.subplots(ncols=2, figsize=figsize)
+            ref_layout = nx.drawing.nx_agraph.graphviz_layout(Gt, prog="dot")
+            draw_graph_subplot(Gt, layout=ref_layout, title=None, ax=ax[0], **formatting_kwargs)
+            draw_graph_subplot(G, layout=ref_layout, title=None, ax=ax[1], **formatting_kwargs)
+            pdf.savefig(f, bbox_inches = 'tight', pad_inches = 0)
+            plt.close()
+    else:
+        figure_features(dpi=dpi)
+        f, ax = plt.subplots(ncols=2, figsize=figsize)
+        ref_layout = nx.drawing.nx_agraph.graphviz_layout(Gt, prog="dot")
+        draw_graph_subplot(Gt, layout=ref_layout, title=names[0], ax=ax[0], **formatting_kwargs)
+        draw_graph_subplot(G, layout=ref_layout, title=names[1], ax=ax[1], **formatting_kwargs)
+        plt.show()
 
 
 def draw_graph(dag: nx.DiGraph,
